@@ -11,6 +11,7 @@ from streamlit_pdf_viewer import pdf_viewer
 from datetime import datetime
 from streamlit_calendar import calendar
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+import base64
 
 users = pd.read_excel('usuarios.xlsx')
 doctors = pd.read_excel('usuarios_doc.xlsx')
@@ -87,8 +88,8 @@ with st.sidebar:
     elif user_type == 'doctor':
         selected = option_menu(
             menu_title=None,
-            options=['Doctor', 'Pacientes', 'Calendario', 'Notificaciones'],
-            icons=['person', 'file-medical', 'calendar','bell'],
+            options=['Doctor', 'Pacientes', 'Citas'],
+            icons=['person', 'file-medical', 'calendar'],
             orientation='vertical',
             menu_icon=None,
             styles={
@@ -97,10 +98,6 @@ with st.sidebar:
                 "nav-link-selected": {"background-color": '#84D9C1'},
             }
         )
-
-def get_image_path(ID_paciente):
-    image_folder_path = '/content/drive/MyDrive/pacientes_docs_imagen/'
-    return f'{image_folder_path}{ID_paciente}.jpeg'
 
 if selected == 'Citas':
     with st.form("Cita"):
@@ -119,7 +116,6 @@ if selected == 'Citas':
         submitted = st.form_submit_button("Agendar cita")
 
         if submitted:
-            # Insertar feedback en Snowflake
 
             st.success("¡Gracias por hacer tu cita!")
 
@@ -192,6 +188,23 @@ if selected == 'Pérfil':
         st.write(f'Celular: {user_data["Celular"]}')
         st.write(f'Teléfono: {user_data["Teléfono"]}')
 
+if selected == 'Exámenes de laboratorio':
+        def mostrar_archivos_pdf():
+          st.subheader("Archivos")
+          st.info('Selecciona el archivo a descargar:')
+          pdf_files = [f for f in os.listdir("pdf_files") if f.endswith('.pdf')]
+          if pdf_files:
+              for pdf in pdf_files:
+                  file_path = os.path.join("pdf_files", pdf)
+                  with open(file_path, "rb") as f:
+                      base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                  download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
+                  st.markdown(download_link, unsafe_allow_html=True)
+          else:
+              st.error("No hay archivos PDF disponibles para descargar.")
+
+        mostrar_archivos_pdf()
+
 def load_med(patient_id):
     file_path = f'{patient_id}_medicamentos.csv'
     try:
@@ -219,7 +232,7 @@ if user_type == 'paciente':
             st.subheader('Medicamentos del paciente:')
 
             gb = GridOptionsBuilder.from_dataframe(med_df)
-            gb.configure_column("Tratamiento_Terminado", editable=True, checkboxSelection=True)
+            gb.configure_column("Tratamiento_Terminado", editable=True)
             grid_options = gb.build()
 
             grid_response = AgGrid(
@@ -266,11 +279,57 @@ if selected == 'Ruta quirúrgica':
               saved_df = pd.read_csv(file_path)
               st.write(saved_df)
           else:
-              st.write("No se encontró ningún historial guardado para este paciente.")
+              st.error("No se encontró ningún historial guardado para este paciente.")
 
+
+def save_diag(diagnostico, patient_id, doctor_id, fecha):
+        diag_df = load_diag(patient_id)
+        new_diag = pd.DataFrame({
+            'Diagnostico': [diagnostico],
+            'patient_id': [patient_id],
+            'Fecha': [fecha],
+            'Doctor_ID': [doctor_id],
+            'Tratamiento_Terminado': [False]
+        })
+        diag_df = pd.concat([diag_df, new_diag], ignore_index=True)
+        file_path = f'{patient_id}_diagnosticos.csv'
+        diag_df.to_csv(file_path, index=False)
+        st.success(f"Se ha guardado el diagnóstico del paciente {patient_id} en '{file_path}'")
+
+def load_diag(patient_id):
+        file_path = f'{patient_id}_diagnosticos.csv'
+        try:
+            diag_df = pd.read_csv(file_path)
+            if 'Tratamiento_Terminado' not in diag_df.columns:
+                diag_df['Tratamiento_Terminado'] = False
+        except FileNotFoundError:
+            diag_df = pd.DataFrame(columns=['Diagnostico', 'Fecha', 'patient_id', 'Doctor_ID', 'Tratamiento_Terminado'])
+        return diag_df
+
+def update_treatment_status(patient_id, updated_diag_df):
+        file_path = f'{patient_id}_diagnosticos.csv'
+        updated_diag_df.to_csv(file_path, index=False)
+        st.success(f"Se ha actualizado el estado del tratamiento del paciente {patient_id}")
 
 if selected == 'Diagnósticos médicos':
-  st.title('')
+      st.title('Mis Diagnósticos')
+      st.write(f"""
+      En esta sección, puedes encontrar detalles sobre tus diagnósticos médicos. La tabla a continuación muestra información importante sobre tus diagnósticos recientes, incluyendo el nombre del diagnóstico, el nombre del doctor que lo realizó, la fecha del diagnóstico, y el estado actual (activo, en remisión, resuelto).
+
+      Si tienes alguna pregunta o inquietud, no dudes en comunicarte con tu médico.
+
+      ¡Gracias por confiar en nosotros con tu cuidado médico!
+      """)
+
+      patient_id = user_data['ID']
+
+      diag_df = load_diag(patient_id)
+      if not diag_df.empty:
+            st.subheader('Diagnósticos actuales:')
+            st.write(diag_df)
+      else:
+            st.error("No se han registrado diagnósticos para este paciente.")
+
 
 if selected == 'Imágenes médicas':
       st.title('Imágenes médicas')
@@ -479,10 +538,6 @@ if selected == 'Registro de síntomas':
     st.subheader("Registro de Síntomas Actual")
     st.write(symptoms_data)
 
-def get_image_path(ID_doctor):
-    image_folder_path = '/content/drive/MyDrive/pacientes_docs_imagen/'
-    return f'{image_folder_path}{ID_doctor}.jpeg'
-
 if selected == 'Doctor':
     usuarios_doc = pd.read_excel("usuarios_doc.xlsx")
     selected = st.session_state.get('selected', None)
@@ -575,12 +630,8 @@ if selected == 'Doctor':
       else:
           st.error("No se encontraron doctores con la especialidad y sub-especialidad seleccionadas.")
 
-def get_image_path(ID_paciente):
-    image_folder_path = '/content/drive/MyDrive/pacientes_docs_imagen/'
-    return f'{image_folder_path}{ID_paciente}.jpeg'
-
 def display_patient_data_by_id(patient_id):
-    symptoms_data = load_symptoms_data(patient_id)  # Cargar los datos de los síntomas
+    symptoms_data = load_symptoms_data(patient_id)  
     if not symptoms_data.empty:
         st.subheader("Registro de Síntomas Actual")
         st.write(symptoms_data[["Fecha", "Síntomas"]])
@@ -909,7 +960,7 @@ if selected == 'Pacientes':
                 st.subheader('Diagnósticos actuales del paciente.')
 
                 gb = GridOptionsBuilder.from_dataframe(diag_df)
-                gb.configure_column("Tratamiento_Terminado", editable=True, checkboxSelection=True)
+                gb.configure_column("Tratamiento_Terminado", editable=True)
                 grid_options = gb.build()
 
                 grid_response = AgGrid(
@@ -936,7 +987,7 @@ if selected == 'Pacientes':
             'Doctor_ID': [doctor_id],
             'Fecha_Inicio': [start_date],
             'Fecha_Fin': [end_date],
-            'Tratamiento_Terminado': [False]  # Nuevo campo para el estado del tratamiento
+            'Tratamiento_Terminado': [False]
         })
         med_df = pd.concat([med_df, new_med], ignore_index=True)
         file_path = f'{patient_id}_medicamentos.csv'
@@ -984,9 +1035,12 @@ if selected == 'Pacientes':
       def create_editable_dataframe(num_rows=5):
           data = {'Cirugía': [''] * num_rows,
                   'Descripción': [''] * num_rows,
+                  'ID Doctor': [''] * num_rows,
+                  'Especialidad': [''] * num_rows,
                   'Pendiente': [False] * num_rows,
                   'En proceso': [False] * num_rows,
                   'Realizada': [False] * num_rows}
+
           return pd.DataFrame(data)
 
       patient_id = st.text_input("Ingrese el ID del paciente:")
@@ -1010,3 +1064,32 @@ if selected == 'Pacientes':
               st.write(saved_df)
           else:
               st.error("No se encontró información para paciente proporcionado.")
+
+    if selected == 'Exámenes de laboratorio':
+      
+      def mostrar_archivos_pdf():
+        st.subheader("Archivos")
+        st.info('Selecciona el archivo a descargar:')
+        pdf_files = [f for f in os.listdir("pdf_files") if f.endswith('.pdf')]
+        if pdf_files:
+            for pdf in pdf_files:
+                file_path = os.path.join("pdf_files", pdf)
+                with open(file_path, "rb") as f:
+                    base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
+                st.markdown(download_link, unsafe_allow_html=True)
+        else:
+            st.error("No hay archivos PDF disponibles para descargar.")
+
+      st.title('Exámenes de laboratorio')
+      st.info('Sube el examen a continuación:')
+      uploaded_file = st.file_uploader("Subir un archivo PDF", type="pdf")
+
+      if uploaded_file is not None:
+          st.success(f"Archivo subido: {uploaded_file.name}")
+          
+          file_path = os.path.join("pdf_files", uploaded_file.name)
+          with open(file_path, "wb") as f:
+              f.write(uploaded_file.getbuffer())
+
+      mostrar_archivos_pdf()

@@ -145,49 +145,49 @@ with st.sidebar:
     else:
     
     if selected == 'Citas':
-            with st.form("Cita"):
-                NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-                ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
-                d, m, a = st.columns(3)
-                with d:
-                    dia = st.number_input("Día", min_value=1, max_value=31)
-                with m:
-                    mes = st.number_input("Mes", min_value=1, max_value=12)
-                with a:
-                    ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100)
-                MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+        with st.form("Cita"):
+            NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
+            ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
+            d, m, a = st.columns(3)
+            with d:
+                dia = st.number_input("Día", min_value=1, max_value=31)
+            with m:
+                mes = st.number_input("Mes", min_value=1, max_value=12)
+            with a:
+                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100)
+            MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+
+            submitted = st.form_submit_button("Agendar cita")
+
+            if submitted:
+                # Guardar los datos en el estado de la sesión
+                st.session_state['NOMBRE'] = NOMBRE
+                st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
+                st.session_state['dia'] = dia
+                st.session_state['mes'] = mes
+                st.session_state['ano'] = ano
+                st.session_state['MOTIVODECITA'] = MOTIVODECITA
+                st.session_state['cita_agendada'] = True
+
+                # Insertar datos en Excel
+                insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+
+                st.success("¡Gracias por hacer tu cita!")
+                st.write("Aquí están los detalles de tu cita:")
+                st.write(f"Médico: {NOMBRE}")
+                st.write(f"Especialidad: {ESPECIALIDAD}")
+                st.write(f"Fecha: {dia}/{mes}/{ano}")
+                st.write(f"Motivo de cita: {MOTIVODECITA}")
     
-                submitted = st.form_submit_button("Agendar cita")
-    
-                if submitted:
-                    # Guardar los datos en el estado de la sesión
-                    st.session_state['NOMBRE'] = NOMBRE
-                    st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
-                    st.session_state['dia'] = dia
-                    st.session_state['mes'] = mes
-                    st.session_state['ano'] = ano
-                    st.session_state['MOTIVODECITA'] = MOTIVODECITA
-                    st.session_state['cita_agendada'] = True
-    
-                    # Insertar datos en Excel
-                    insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
-    
-                    st.success("¡Gracias por hacer tu cita!")
-                    st.write("Aquí están los detalles de tu cita:")
-                    st.write(f"Médico: {NOMBRE}")
-                    st.write(f"Especialidad: {ESPECIALIDAD}")
-                    st.write(f"Fecha: {dia}/{mes}/{ano}")
-                    st.write(f"Motivo de cita: {MOTIVODECITA}")
-        
-            NOMBRE_MEDICO = st.selectbox("Seleccionar médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-            if st.button("Ver citas"):
-            citas = get_citas_from_excel(NOMBRE_MEDICO)
-            for index, cita in citas.iterrows():
-                st.write(f"Médico: {cita['Nombre']}")
-                st.write(f"Especialidad: {cita['Especialidad']}")
-                st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
-                st.write(f"Motivo de cita: {cita['Motivo']}")
-                st.write("---")
+        NOMBRE_MEDICO = st.selectbox("Seleccionar médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
+        if st.button("Ver citas"):
+        citas = get_citas_from_excel(NOMBRE_MEDICO)
+        for index, cita in citas.iterrows():
+            st.write(f"Médico: {cita['Nombre']}")
+            st.write(f"Especialidad: {cita['Especialidad']}")
+            st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
+            st.write(f"Motivo de cita: {cita['Motivo']}")
+            st.write("---")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

@@ -3,5 +3,4 @@ streamlit-option-menu
 streamlit-authenticator
 streamlit-calendar
 streamlit-aggrid
-streamlit_pdf_viewer
-pdf_viewer
+pdf-viewer

@@ -135,7 +135,7 @@ if selected == 'Pérfil':
             col3.metric('Contacto de emergencia', user_data['Contacto de emergencia'])
 
         try:
-            path = get_image_path(id)
+            path = f'{id}.jpeg'
             print("Ruta de la imagen:", path)
             image = Image.open(path)
             col1.image(image, caption=f'Paciente')

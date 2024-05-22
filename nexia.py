@@ -494,7 +494,7 @@ if selected == 'Doctor':
                 col3.metric("Celular", celular)
 
             try:
-                path = get_image_path(id)
+                path = f'{id}.jpeg'
                 print("Ruta de la imagen:", path)
                 image = Image.open(path)
                 col1.image(image, caption=f'Dr. {nombre}')
@@ -549,7 +549,7 @@ if selected == 'Doctor':
       if not filtered_doctors.empty:
           for index, doctor_info in filtered_doctors.iterrows():
               doctor_id = doctor_info['ID']
-              image_path = get_image_path(doctor_id)
+              image_path = f'{doctor_id}.jpeg'
               display_doctor_info(doctor_info, image_path)
       else:
           st.error("No se encontraron doctores con la especialidad y sub-especialidad seleccionadas.")
@@ -639,7 +639,7 @@ if selected == 'Pacientes':
                 col4.metric('Medicación actual', medicacion)
 
             try:
-              path = get_image_path(id)
+              path = f'{id}.jpeg'
               print("Ruta de la imagen:", path)
               image = Image.open(path)
               col1.image(image, caption=f'Paciente {name} {ap_paterno} {ap_materno}')

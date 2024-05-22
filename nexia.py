@@ -131,7 +131,18 @@ with st.sidebar:
             return citas
         else:
             return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
-
+            
+    if 'cita_agendada' not in st.session_state:
+        st.session_state['cita_agendada'] = False
+    
+    if st.session_state['cita_agendada']:
+        st.success("¡Gracias por hacer tu cita!")
+        st.write("Aquí están los detalles de tu cita:")
+        st.write(f"Médico: {st.session_state['NOMBRE']}")
+        st.write(f"Especialidad: {st.session_state['ESPECIALIDAD']}")
+        st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
+        st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
+    else:
     
     if selected == 'Citas':
             with st.form("Cita"):

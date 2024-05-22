@@ -120,63 +120,65 @@ with st.sidebar:
         df.to_excel(file_path, index=False)
     
     # Función para obtener citas para un médico específico desde Excel
-    def get_citas_from_excel(nombre_medico):
-        file_path = "citas.xlsx"
-        
-        # Leer el archivo de Excel
-        if os.path.exists(file_path):
-            df = pd.read_excel(file_path)
-            # Filtrar las citas para el médico específico
-            citas = df[df['Nombre'] == nombre_medico]
-            return citas
-        else:
-            return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
+def get_citas_from_excel(nombre_medico):
+    file_path = "citas.xlsx"
     
-    if 'cita_agendada' not in st.session_state:
-        st.session_state['cita_agendada'] = False
-    
-    if st.session_state['cita_agendada']:
-        st.success("¡Gracias por hacer tu cita!")
-        st.write("Aquí están los detalles de tu cita:")
-        st.write(f"Médico: {st.session_state['NOMBRE']}")
-        st.write(f"Especialidad: {st.session_state['ESPECIALIDAD']}")
-        st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
-        st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
+    # Leer el archivo de Excel
+    if os.path.exists(file_path):
+        df = pd.read_excel(file_path)
+        # Filtrar las citas para el médico específico
+        citas = df[df['Nombre'] == nombre_medico]
+        return citas
     else:
-        if 'Citas' == 'Citas':  # Suponiendo que 'Citas' está seleccionado
-            with st.form("Cita"):
-                NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-                ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
-                d, m, a = st.columns(3)
-                with d:
-                    dia = st.number_input("Día", min_value=1, max_value=31)
-                with m:
-                    mes = st.number_input("Mes", min_value=1, max_value=12)
-                with a:
-                    ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100)
-                MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+        return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
+
     
-                submitted = st.form_submit_button("Agendar cita")
-    
-                if submitted:
-                    # Guardar los datos en el estado de la sesión
-                    st.session_state['NOMBRE'] = NOMBRE
-                    st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
-                    st.session_state['dia'] = dia
-                    st.session_state['mes'] = mes
-                    st.session_state['ano'] = ano
-                    st.session_state['MOTIVODECITA'] = MOTIVODECITA
-                    st.session_state['cita_agendada'] = True
-    
-                    # Insertar datos en Excel
-                    insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
-    
-                    st.success("¡Gracias por hacer tu cita!")
-                    st.write("Aquí están los detalles de tu cita:")
-                    st.write(f"Médico: {NOMBRE}")
-                    st.write(f"Especialidad: {ESPECIALIDAD}")
-                    st.write(f"Fecha: {dia}/{mes}/{ano}")
-                    st.write(f"Motivo de cita: {MOTIVODECITA}")
+    if selected == 'Citas':
+        if 'cita_agendada' not in st.session_state:
+            st.session_state['cita_agendada'] = False
+        
+        if st.session_state['cita_agendada']:
+            st.success("¡Gracias por hacer tu cita!")
+            st.write("Aquí están los detalles de tu cita:")
+            st.write(f"Médico: {st.session_state['NOMBRE']}")
+            st.write(f"Especialidad: {st.session_state['ESPECIALIDAD']}")
+            st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
+            st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
+        else:
+            if 'Citas' == 'Citas':  # Suponiendo que 'Citas' está seleccionado
+                with st.form("Cita"):
+                    NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
+                    ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
+                    d, m, a = st.columns(3)
+                    with d:
+                        dia = st.number_input("Día", min_value=1, max_value=31)
+                    with m:
+                        mes = st.number_input("Mes", min_value=1, max_value=12)
+                    with a:
+                        ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100)
+                    MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+        
+                    submitted = st.form_submit_button("Agendar cita")
+        
+                    if submitted:
+                        # Guardar los datos en el estado de la sesión
+                        st.session_state['NOMBRE'] = NOMBRE
+                        st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
+                        st.session_state['dia'] = dia
+                        st.session_state['mes'] = mes
+                        st.session_state['ano'] = ano
+                        st.session_state['MOTIVODECITA'] = MOTIVODECITA
+                        st.session_state['cita_agendada'] = True
+        
+                        # Insertar datos en Excel
+                        insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+        
+                        st.success("¡Gracias por hacer tu cita!")
+                        st.write("Aquí están los detalles de tu cita:")
+                        st.write(f"Médico: {NOMBRE}")
+                        st.write(f"Especialidad: {ESPECIALIDAD}")
+                        st.write(f"Fecha: {dia}/{mes}/{ano}")
+                        st.write(f"Motivo de cita: {MOTIVODECITA}")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

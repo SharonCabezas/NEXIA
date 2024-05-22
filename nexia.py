@@ -178,6 +178,16 @@ with st.sidebar:
                     st.write(f"Especialidad: {ESPECIALIDAD}")
                     st.write(f"Fecha: {dia}/{mes}/{ano}")
                     st.write(f"Motivo de cita: {MOTIVODECITA}")
+        
+            NOMBRE_MEDICO = st.selectbox("Seleccionar médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
+            if st.button("Ver citas"):
+            citas = get_citas_from_excel(NOMBRE_MEDICO)
+            for index, cita in citas.iterrows():
+                st.write(f"Médico: {cita['Nombre']}")
+                st.write(f"Especialidad: {cita['Especialidad']}")
+                st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
+                st.write(f"Motivo de cita: {cita['Motivo']}")
+                st.write("---")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

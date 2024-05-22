@@ -1,8 +1,9 @@
-streamlit
 pandas
+streamlit
 streamlit-option-menu
+Pillow
 streamlit-authenticator
+streamlit-pdf-viewer
 streamlit-calendar
 streamlit-aggrid
-streamlit_pdf_viewer
 openpyxl

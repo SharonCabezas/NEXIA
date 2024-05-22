@@ -8,3 +8,4 @@ streamlit-calendar
 streamlit-aggrid
 openpyxl
 pdf-files
+PyPDF2

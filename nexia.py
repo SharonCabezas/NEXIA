@@ -102,6 +102,27 @@ def get_image_path(ID_paciente):
     image_folder_path = '/content/drive/MyDrive/pacientes_docs_imagen/'
     return f'{image_folder_path}{ID_paciente}.jpeg'
 
+if selected == 'Citas':
+    with st.form("Cita"):
+        NOMBRE = st.selectbox("Médico: ", doctors['Nombre(s)']+" "+doctors['Apellido paterno']+" "+doctors['Apellido materno'])
+        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
+        d,m,a= st.columns(3)
+        with d:
+            dia = st.number_input("Día", min_value=1, max_value=31)
+        with m:
+            mes = st.number_input("Mes", min_value=1, max_value=12)
+        with a:
+            ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100) 
+        MOTIVODECITA = st.selectbox("Motivo de cita: ",['Primera cita', 'Seguimiento'])
+
+        
+        submitted = st.form_submit_button("Agendar cita")
+
+        if submitted:
+            # Insertar feedback en Snowflake
+
+            st.success("¡Gracias por hacer tu cita!")
+
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")
     selected = st.session_state.get('selected',None)

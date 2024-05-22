@@ -4,3 +4,4 @@ streamlit-authenticator
 streamlit-calendar
 streamlit-aggrid
 pdf-viewer
+streamlit-pdf-viewer 

@@ -7,4 +7,3 @@ streamlit-pdf-viewer
 streamlit-calendar
 streamlit-aggrid
 openpyxl
-base64

@@ -124,8 +124,9 @@ def get_citas_from_excel(nombre_medico):
     else:
         return pd.DataFrame(columns=['NOMBRE','NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
 
-def update_cita_estado(nombre_medico, dia, mes, ano, estado):
-    file_path = "BD Citas.csv"
+def update_cita_estado(citas, index, new_state):
+    citas.loc[index, 'estado'] = new_state
+    citas.to_csv('BD Citas.csv', index=False)
 
 if selected == 'Cita':
     with st.form("Cita"):
@@ -177,10 +178,10 @@ if selected == 'Citas' and user_type == 'doctor':
             if estado == 'Pendiente':
                 accepted = st.button(f"Aceptar Cita {index + 1}")
                 rejected = st.button(f"Rechazar Cita {index + 1}")
-                if accepted:
-                    update_cita_estado(cita['NOMBREC'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
-                elif rejected:
-                    update_cita_estado(cita['NOMBREC'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
+            if accepted:
+                    update_cita_estado(citas, index, 'Aceptada')  # Actualizar el estado a 'Aceptada'
+            elif rejected:
+                    update_cita_estado(citas, index, 'Rechazada')  # Actualizar el estado a 'Rechazada'
             else:
                 st.write(f"Estado: {estado}")
 

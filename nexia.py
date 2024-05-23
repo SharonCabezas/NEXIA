@@ -108,7 +108,7 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
     else:
         df = pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
-    new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
+    new_data = pd.DataFrame([[nombre,nombrec, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['NOMBRE','NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
     df = pd.concat([df, new_data], ignore_index=True)
     
@@ -122,7 +122,7 @@ def get_citas_from_excel(nombre_medico):
         citas = df[df['NOMBRE'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
+        return pd.DataFrame(columns=['NOMBRE','NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
 
 def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     file_path = "BD Citas.csv"
@@ -158,7 +158,7 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
             MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
 
             submitted = st.form_submit_button("Agendar cita")
-
+            NOMBRE_CLIENTE = f"{user_data_patient['Nombre(s)']} {user_data_patient['Apellido paterno']} {user_data_patient['Apellido materno']}"
             if submitted:
                 st.session_state['NOMBRE'] = NOMBRE
                 st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
@@ -168,14 +168,12 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
                 st.session_state['MOTIVODECITA'] = MOTIVODECITA
                 st.session_state['cita_agendada'] = True
 
-                insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+                insert_cita_to_excel(NOMBRE,NOMBRE_CLIENTE ,ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
 
                 st.success("¡Gracias por hacer tu cita!")
-                st.write("Aquí están los detalles de tu cita:")
-                st.write(f"Médico: {NOMBRE}")
-                st.write(f"Especialidad: {ESPECIALIDAD}")
-                st.write(f"Fecha: {dia}/{mes}/{ano}")
-                st.write(f"Motivo de cita: {MOTIVODECITA}")
+                cita = pd.read_csv("BD Citas.csv")
+                dfcita=cita.loc[cita["NOMBREC"==NOMBRE_CLIENTE]
+                st.dataframe(df)
 
     if selected == 'Citas' and user_type == 'doctor':
         NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"

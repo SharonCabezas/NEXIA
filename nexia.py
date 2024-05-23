@@ -178,28 +178,28 @@ else:
                 st.write(f"Motivo de cita: {MOTIVODECITA}")
 
     if selected == 'Citas' and user_type == 'doctor':
-    NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
-    citas = get_citas_from_excel(NOMBRE_MEDICO)
-
-    if not citas.empty:
-        st.subheader(f"Citas para {NOMBRE_MEDICO}")
-        
-        for index, cita in citas.iterrows():
-            st.write(f"Cita {index + 1}:")
-            st.write(f"Médico: {cita['Nombre']}")
-            st.write(f"Especialidad: {cita['Especialidad']}")
-            st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
-            st.write(f"Motivo de cita: {cita['Motivo']}")
-            estado = cita['Estado']
-            if estado == 'Pendiente':
-                accepted = st.button(f"Aceptar Cita {index + 1}")
-                rejected = st.button(f"Rechazar Cita {index + 1}")
-                if accepted:
-                    update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Aceptada')
-                elif rejected:
-                    update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Rechazada')
-            else:
-                st.write(f"Estado: {estado}")
+        NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
+        citas = get_citas_from_excel(NOMBRE_MEDICO)
+    
+        if not citas.empty:
+            st.subheader(f"Citas para {NOMBRE_MEDICO}")
+            
+            for index, cita in citas.iterrows():
+                st.write(f"Cita {index + 1}:")
+                st.write(f"Médico: {cita['Nombre']}")
+                st.write(f"Especialidad: {cita['Especialidad']}")
+                st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
+                st.write(f"Motivo de cita: {cita['Motivo']}")
+                estado = cita['Estado']
+                if estado == 'Pendiente':
+                    accepted = st.button(f"Aceptar Cita {index + 1}")
+                    rejected = st.button(f"Rechazar Cita {index + 1}")
+                    if accepted:
+                        update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Aceptada')
+                    elif rejected:
+                        update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Rechazada')
+                else:
+                    st.write(f"Estado: {estado}")
 
 
 if selected == 'Pérfil':

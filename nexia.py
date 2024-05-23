@@ -1195,7 +1195,7 @@ if selected == 'Pacientes':
 
                 if st.button('Generar receta'):
                     if selected_med and patient_id and doctor_id:
-                        save_medic(selected_med, selected_concentracion, patient_id, doctor_id, start_date, end_date)
+                        save_medic(selected_med, selected_concentracion, patient_id, doctor_id, start_date, end_date,instruc)
                     else:
                         st.error("Por favor, complete todos los campos.")
                 med_df = load_med(patient_id)

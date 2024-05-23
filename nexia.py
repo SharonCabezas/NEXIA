@@ -131,6 +131,7 @@ def update_cita_estado(citas, index, new_state):
 if selected == 'Cita':
     with st.form("Cita"):
         st.title('Agendar citas')
+        st.header('Formulario de Agendar Cita')
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         cita = pd.read_csv("BD Citas.csv")
         dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
@@ -165,6 +166,7 @@ if selected == 'Cita':
             st.dataframe(dfcita)
 
 if selected == 'Citas' and user_type == 'doctor':
+    st.title('Citas Agendadas')
     NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
     citas = get_citas_from_excel(NOMBRE_MEDICO)
 

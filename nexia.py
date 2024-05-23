@@ -126,76 +126,59 @@ def get_citas_from_excel(nombre_medico):
 
 def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     file_path = "BD Citas.csv"
-    
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-        mask = (df['NOMBRE'] == nombre_medico) & (df['dia'] == dia) & (df['mes'] == mes) & (df['ano'] == ano)
-        df.loc[mask, 'estado'] = estado
-        df.to_csv(file_path, index=False)
 
-        if 'cita_agendada' not in st.session_state:
-            st.session_state['cita_agendada'] = False
-        
-        if st.session_state['cita_agendada']:
+if selected == 'Cita':
+    with st.form("Cita"):
+        NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
+        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
+        d, m, a = st.columns(3)
+        with d:
+            dia = st.number_input("Día", min_value=1, max_value=31, step=1)
+        with m:
+            mes = st.number_input("Mes", min_value=1, max_value=12, step=1)
+        with a:
+            ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100, step=1)
+        MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+
+        submitted = st.form_submit_button("Agendar cita")
+        NOMBRE_CLIENTE = f"{user_data_patient['Nombre(s)']} {user_data_patient['Apellido paterno']} {user_data_patient['Apellido materno']}"
+        if submitted:
+            st.session_state['NOMBRE'] = NOMBRE
+            st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
+            st.session_state['dia'] = dia
+            st.session_state['mes'] = mes
+            st.session_state['ano'] = ano
+            st.session_state['MOTIVODECITA'] = MOTIVODECITA
+            st.session_state['cita_agendada'] = True
+
+            insert_cita_to_excel(NOMBRE,NOMBRE_CLIENTE ,ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+
             st.success("¡Gracias por hacer tu cita!")
-            st.write("Aquí están los detalles de tu cita:")
-            st.write(f"Médico: {st.session_state['NOMBRE']}")
-            st.write(f"Especialidad: {st.session_state['ESPECIALIDAD']}")
-            st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
-            st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
+            cita = pd.read_csv("BD Citas.csv")
+            dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
+            st.dataframe(dfcita)
 
-    if selected == 'Cita':
-        with st.form("Cita"):
-            NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-            ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
-            d, m, a = st.columns(3)
-            with d:
-                dia = st.number_input("Día", min_value=1, max_value=31, step=1)
-            with m:
-                mes = st.number_input("Mes", min_value=1, max_value=12, step=1)
-            with a:
-                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100, step=1)
-            MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
+if selected == 'Citas' and user_type == 'doctor':
+    NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
+    citas = get_citas_from_excel(NOMBRE_MEDICO)
 
-            submitted = st.form_submit_button("Agendar cita")
-            NOMBRE_CLIENTE = f"{user_data_patient['Nombre(s)']} {user_data_patient['Apellido paterno']} {user_data_patient['Apellido materno']}"
-            if submitted:
-                st.session_state['NOMBRE'] = NOMBRE
-                st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
-                st.session_state['dia'] = dia
-                st.session_state['mes'] = mes
-                st.session_state['ano'] = ano
-                st.session_state['MOTIVODECITA'] = MOTIVODECITA
-                st.session_state['cita_agendada'] = True
+    if not citas.empty:
+        st.subheader(f"Citas para {NOMBRE_MEDICO}")
 
-                insert_cita_to_excel(NOMBRE,NOMBRE_CLIENTE ,ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+        # Mostrar las citas en una tabla
+        st.dataframe(citas)
 
-                st.success("¡Gracias por hacer tu cita!")
-                cita = pd.read_csv("BD Citas.csv")
-                dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
-                st.dataframe(dfcita)
-
-    if selected == 'Citas' and user_type == 'doctor':
-        NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
-        citas = get_citas_from_excel(NOMBRE_MEDICO)
-    
-        if not citas.empty:
-            st.subheader(f"Citas para {NOMBRE_MEDICO}")
-    
-            # Mostrar las citas en una tabla
-            st.dataframe(citas)
-    
-            for index, cita in citas.iterrows():
-                estado = cita['estado']
-                if estado == 'Pendiente':
-                    accepted = st.button(f"Aceptar Cita {index + 1}")
-                    rejected = st.button(f"Rechazar Cita {index + 1}")
-                    if accepted:
-                        update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
-                    elif rejected:
-                        update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
-                else:
-                    st.write(f"Estado: {estado}")
+        for index, cita in citas.iterrows():
+            estado = cita['estado']
+            if estado == 'Pendiente':
+                accepted = st.button(f"Aceptar Cita {index + 1}")
+                rejected = st.button(f"Rechazar Cita {index + 1}")
+                if accepted:
+                    update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
+                elif rejected:
+                    update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
+            else:
+                st.write(f"Estado: {estado}")
 
 
 

@@ -178,32 +178,29 @@ else:
                 st.write(f"Motivo de cita: {MOTIVODECITA}")
 
     if selected == 'Citas' and user_type == 'doctor':
-        NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
-        citas = get_citas_from_excel(NOMBRE_MEDICO)
+    NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
+    citas = get_citas_from_excel(NOMBRE_MEDICO)
 
-        if not citas.empty:
-            st.subheader(f"Citas para {NOMBRE_MEDICO}")
-            
-            gb = GridOptionsBuilder.from_dataframe(citas)
-            gb.configure_pagination(paginationAutoPageSize=True)
-            gb.configure_default_column(editable=True, groupable=True)
-            gb.configure_column("estado", cellEditor='agSelectCellEditor', cellEditorParams={'values': ['Pendiente', 'Aceptada', 'Rechazada']})
-            gb.configure_grid_options(onCellValueChanged='cellValueChanged')
+    if not citas.empty:
+        st.subheader(f"Citas para {NOMBRE_MEDICO}")
+        
+        for index, cita in citas.iterrows():
+            st.write(f"Cita {index + 1}:")
+            st.write(f"Médico: {cita['Nombre']}")
+            st.write(f"Especialidad: {cita['Especialidad']}")
+            st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
+            st.write(f"Motivo de cita: {cita['Motivo']}")
+            estado = cita['Estado']
+            if estado == 'Pendiente':
+                accepted = st.button(f"Aceptar Cita {index + 1}")
+                rejected = st.button(f"Rechazar Cita {index + 1}")
+                if accepted:
+                    update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Aceptada')
+                elif rejected:
+                    update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Rechazada')
+            else:
+                st.write(f"Estado: {estado}")
 
-            gridOptions = gb.build()
-
-            def on_cell_value_changed(event):
-                update_cita_estado(event['data']['NOMBRE'], event['data']['dia'], event['data']['mes'], event['data']['ano'], event['data']['estado'])
-                st.experimental_rerun()
-
-            grid_response = AgGrid(
-                citas,
-                gridOptions=gridOptions,
-                update_mode=GridUpdateMode.VALUE_CHANGED,
-                allow_unsafe_jscode=True
-            )
-
-            st.write("Para actualizar el estado de una cita, cambie el valor en la columna 'estado' y presione 'Enter'.")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

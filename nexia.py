@@ -74,7 +74,7 @@ with st.sidebar:
     if user_type == 'paciente':
         selected = option_menu(
             menu_title=None,
-            options=['Pérfil', 'Citas', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
+            options=['Pérfil', 'Cita', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
             icons=['person', 'book', 'capsule', 'droplet', 'flower1', 'clipboard2-pulse-fill', 'heart-pulse', 'card-image', 'check2-circle', 'activity'],
             orientation='vertical',
             menu_icon=None,
@@ -144,17 +144,17 @@ if st.session_state['cita_agendada']:
     st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
 else:
 
-    if selected == 'Agendar Cita':
+    if selected == 'Cita':
         with st.form("Cita"):
             NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
             ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
             d, m, a = st.columns(3)
             with d:
-                dia = st.number_input("Día", min_value=1, max_value=31)
+                dia = st.number_input("Día", min_value=1, max_value=31,step=1)
             with m:
-                mes = st.number_input("Mes", min_value=1, max_value=12)
+                mes = st.number_input("Mes", min_value=1, max_value=12,step=1)
             with a:
-                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100)
+                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100,step=1)
             MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
 
             submitted = st.form_submit_button("Agendar cita")

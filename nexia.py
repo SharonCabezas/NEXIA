@@ -186,11 +186,11 @@ else:
             
             for index, cita in citas.iterrows():
                 st.write(f"Cita {index + 1}:")
-                st.write(f"Médico: {cita['Nombre']}")
-                st.write(f"Especialidad: {cita['Especialidad']}")
-                st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
-                st.write(f"Motivo de cita: {cita['Motivo']}")
-                estado = cita['Estado']
+                st.write(f"Médico: {cita['NOMBRE']}")
+                st.write(f"Especialidad: {cita['ESPECIALIDAD']}")
+                st.write(f"Fecha: {cita['dia']}/{cita['mes']}/{cita['ano']}")
+                st.write(f"Motivo de cita: {cita['MOTIVODECITA']}")
+                estado = cita['estado']
                 if estado == 'Pendiente':
                     accepted = st.button(f"Aceptar Cita {index + 1}")
                     rejected = st.button(f"Rechazar Cita {index + 1}")

@@ -182,8 +182,6 @@ if selected == 'Citas' and user_type == 'doctor':
                         update_cita_estado(citas, index, 'Aceptada')  # Actualizar el estado a 'Aceptada'
                 elif rejected:
                         update_cita_estado(citas, index, 'Rechazada')  # Actualizar el estado a 'Rechazada'
-                else:
-                    st.write(f"Estado: {estado}")
             else:
                 st.write(f"Estado: {estado}")
 

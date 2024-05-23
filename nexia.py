@@ -141,7 +141,7 @@ if selected == 'Cita':
         MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
 
         submitted = st.form_submit_button("Agendar cita")
-        NOMBRE_CLIENTE = f"{user_data_patient['Nombre(s)']} {user_data_patient['Apellido paterno']} {user_data_patient['Apellido materno']}"
+        NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         if submitted:
             st.session_state['NOMBRE'] = NOMBRE
             st.session_state['ESPECIALIDAD'] = ESPECIALIDAD

@@ -143,7 +143,7 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
             st.write(f"Especialidad: {st.session_state['ESPECIALIDAD']}")
             st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
             st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
-else:
+
     if selected == 'Cita':
         with st.form("Cita"):
             NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])

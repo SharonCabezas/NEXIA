@@ -99,33 +99,26 @@ with st.sidebar:
             }
         )
 
+
 def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
     file_path = "BD Citas.csv"
     
-    # Verificar si el archivo ya existe
     if os.path.exists(file_path):
-        # Leer el archivo existente
         df = pd.read_csv(file_path)
     else:
-        # Crear un nuevo DataFrame si el archivo no existe
-        df = pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
+        df = pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
-    # Crear un nuevo DataFrame con la nueva cita
     new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
-    # Concatenar el nuevo DataFrame con el existente
     df = pd.concat([df, new_data], ignore_index=True)
     
-    # Guardar el DataFrame en el archivo de Excel
     df.to_csv(file_path, index=False)
 
 def get_citas_from_excel(nombre_medico):
     file_path = "BD Citas.csv"
     
-    # Leer el archivo de Excel
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        # Filtrar las citas para el médico específico
         citas = df[df['NOMBRE'] == nombre_medico]
         return citas
     else:
@@ -136,10 +129,8 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        # Localizar la cita específica y actualizar su estado
         mask = (df['NOMBRE'] == nombre_medico) & (df['dia'] == dia) & (df['mes'] == mes) & (df['ano'] == ano)
-        df.loc[mask, 'Estado'] = estado
-        # Guardar los cambios en el archivo
+        df.loc[mask, 'estado'] = estado
         df.to_csv(file_path, index=False)
 
 if 'cita_agendada' not in st.session_state:
@@ -169,7 +160,6 @@ else:
             submitted = st.form_submit_button("Agendar cita")
 
             if submitted:
-                # Guardar los datos en el estado de la sesión
                 st.session_state['NOMBRE'] = NOMBRE
                 st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
                 st.session_state['dia'] = dia
@@ -178,7 +168,6 @@ else:
                 st.session_state['MOTIVODECITA'] = MOTIVODECITA
                 st.session_state['cita_agendada'] = True
 
-                # Insertar datos en Excel
                 insert_cita_to_excel(NOMBRE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
 
                 st.success("¡Gracias por hacer tu cita!")
@@ -198,13 +187,13 @@ else:
             gb = GridOptionsBuilder.from_dataframe(citas)
             gb.configure_pagination(paginationAutoPageSize=True)
             gb.configure_default_column(editable=True, groupable=True)
-            gb.configure_column("Estado", cellEditor='agSelectCellEditor', cellEditorParams={'values': ['Pendiente', 'Aceptada', 'Rechazada']})
+            gb.configure_column("estado", cellEditor='agSelectCellEditor', cellEditorParams={'values': ['Pendiente', 'Aceptada', 'Rechazada']})
             gb.configure_grid_options(onCellValueChanged='cellValueChanged')
 
             gridOptions = gb.build()
 
             def on_cell_value_changed(event):
-                update_cita_estado(event['data']['Nombre'], event['data']['Dia'], event['data']['Mes'], event['data']['Ano'], event['data']['Estado'])
+                update_cita_estado(event['data']['NOMBRE'], event['data']['dia'], event['data']['mes'], event['data']['ano'], event['data']['estado'])
                 st.experimental_rerun()
 
             grid_response = AgGrid(
@@ -214,11 +203,13 @@ else:
                 allow_unsafe_jscode=True
             )
 
+            st.write("Para actualizar el estado de una cita, cambie el valor en la columna 'estado' y presione 'Enter'.")
+
             for row in grid_response['data']:
-                if 'Pendiente' in row['Estado']:
+                if 'Pendiente' in row['estado']:
                     st.write(f"Pendiente de respuesta: {row}")
                 else:
-                    st.write(f"Estado: {row['Estado']}")
+                    st.write(f"Estado: {row['estado']}")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

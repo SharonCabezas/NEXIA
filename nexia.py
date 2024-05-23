@@ -181,6 +181,10 @@ else:
         NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         citas = get_citas_from_excel(NOMBRE_MEDICO)
 
+        # Debugging output
+        st.write("Citas DataFrame structure:")
+        st.write(citas.head())
+
         if not citas.empty:
             st.subheader(f"Citas para {NOMBRE_MEDICO}")
             
@@ -205,8 +209,11 @@ else:
 
             st.write("Para actualizar el estado de una cita, cambie el valor en la columna 'estado' y presione 'Enter'.")
 
+            # Debugging output for each row
             for row in grid_response['data']:
-                if 'Pendiente' in row['estado']:
+                st.write("Current row data:")
+                st.write(row)
+                if 'estado' in row and 'Pendiente' in row['estado']:
                     st.write(f"Pendiente de respuesta: {row}")
                 else:
                     st.write(f"Estado: {row['estado']}")

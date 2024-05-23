@@ -1175,7 +1175,7 @@ if selected == 'Pacientes':
             if 'Tratamiento_Terminado' not in med_df.columns:
                 med_df['Tratamiento_Terminado'] = False
         except FileNotFoundError:
-            med_df = pd.DataFrame(columns=['Medicamento', 'Concentración', 'Fecha', 'Doctor_ID','Instrucción', 'Fecha_Inicio', 'Fecha_Fin', 'Tratamiento_Terminado'])
+            med_df = pd.DataFrame(columns=['Medicamento', 'Concentración', 'Fecha', 'Doctor_ID','Instrucción', 'Fecha_Inicio', 'Fecha_Fin','Instrucción','Tratamiento_Terminado'])
         return med_df
 
 

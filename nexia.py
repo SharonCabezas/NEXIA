@@ -129,8 +129,8 @@ def update_cita_estado(citas, index, new_state):
     citas.to_csv('BD Citas.csv', index=False)
 
 if selected == 'Cita':
-    st.title('Agendar citas')
     with st.form("Cita"):
+        st.title('Agendar citas')
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         cita = pd.read_csv("BD Citas.csv")
         dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]

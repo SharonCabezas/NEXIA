@@ -129,6 +129,10 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
 
 if selected == 'Cita':
     with st.form("Cita"):
+        NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
+        cita = pd.read_csv("BD Citas.csv")
+        fcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
+        st.dataframe(dfcita)
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
         ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
         d, m, a = st.columns(3)
@@ -141,7 +145,6 @@ if selected == 'Cita':
         MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
 
         submitted = st.form_submit_button("Agendar cita")
-        NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         if submitted:
             st.session_state['NOMBRE'] = NOMBRE
             st.session_state['ESPECIALIDAD'] = ESPECIALIDAD
@@ -174,9 +177,9 @@ if selected == 'Citas' and user_type == 'doctor':
                 accepted = st.button(f"Aceptar Cita {index + 1}")
                 rejected = st.button(f"Rechazar Cita {index + 1}")
                 if accepted:
-                    update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
+                    update_cita_estado(cita['NOMBREC'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
                 elif rejected:
-                    update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
+                    update_cita_estado(cita['NOMBREC'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
             else:
                 st.write(f"Estado: {estado}")
 

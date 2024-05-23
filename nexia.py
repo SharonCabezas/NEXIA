@@ -74,7 +74,7 @@ with st.sidebar:
     if user_type == 'paciente':
         selected = option_menu(
             menu_title=None,
-            options=['Pérfil', 'Citas', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
+            options=['Pérfil', 'Agendar Cita', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
             icons=['person', 'book', 'capsule', 'droplet', 'flower1', 'clipboard2-pulse-fill', 'heart-pulse', 'card-image', 'check2-circle', 'activity'],
             orientation='vertical',
             menu_icon=None,
@@ -100,12 +100,12 @@ with st.sidebar:
         )
 
 def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
-    file_path = "citas.xlsx"
+    file_path = "BD Citas.csv"
     
     # Verificar si el archivo ya existe
     if os.path.exists(file_path):
         # Leer el archivo existente
-        df = pd.read_excel(file_path)
+        df = pd.read_csv(file_path)
     else:
         # Crear un nuevo DataFrame si el archivo no existe
         df = pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
@@ -117,20 +117,20 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
     df = pd.concat([df, new_data], ignore_index=True)
     
     # Guardar el DataFrame en el archivo de Excel
-    df.to_excel(file_path, index=False)
+    df.to_csv(file_path, index=False)
 
 # Función para obtener citas para un médico específico desde Excel
 def get_citas_from_excel(nombre_medico):
-    file_path = "citas.xlsx"
+    file_path = "BD Citas.csv"
     
     # Leer el archivo de Excel
     if os.path.exists(file_path):
-        df = pd.read_excel(file_path)
+        df = pd.read_csv(file_path)
         # Filtrar las citas para el médico específico
         citas = df[df['Nombre'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
+        return pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'Dia', 'Mes', 'Ano', 'MOTIVODECITA'])
         
 if 'cita_agendada' not in st.session_state:
     st.session_state['cita_agendada'] = False
@@ -144,7 +144,7 @@ if st.session_state['cita_agendada']:
     st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
 else:
 
-    if selected == 'Citas':
+    if selected == 'Agendar Cita':
         with st.form("Cita"):
             NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
             ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
@@ -179,6 +179,7 @@ else:
                 st.write(f"Fecha: {dia}/{mes}/{ano}")
                 st.write(f"Motivo de cita: {MOTIVODECITA}")
     
+    if selected == 'Citas':
         NOMBRE_MEDICO = st.selectbox("Seleccionar médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
         if st.button("Ver citas"):
             citas = get_citas_from_excel(NOMBRE_MEDICO)

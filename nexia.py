@@ -100,7 +100,7 @@ with st.sidebar:
         )
 
 
-def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
+def insert_cita_to_excel(nombre,nombrec, especialidad, dia, mes, ano, motivo):
     file_path = "BD Citas.csv"
     
     if os.path.exists(file_path):

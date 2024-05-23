@@ -1,3 +1,4 @@
+%%writefile app.py
 import pandas as pd
 import os
 from pathlib import Path
@@ -74,7 +75,7 @@ with st.sidebar:
     if user_type == 'paciente':
         selected = option_menu(
             menu_title=None,
-            options=['Pérfil', 'Agendar Cita', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
+            options=['Pérfil', 'Citas', 'Medicamentos', 'Vacunas', 'Alergias', 'Exámenes de laboratorio', 'Ruta quirúrgica', 'Imágenes médicas', 'Registro de síntomas', 'Diagnósticos médicos'],
             icons=['person', 'book', 'capsule', 'droplet', 'flower1', 'clipboard2-pulse-fill', 'heart-pulse', 'card-image', 'check2-circle', 'activity'],
             orientation='vertical',
             menu_icon=None,
@@ -205,15 +206,16 @@ if selected == 'Pérfil':
         ap_materno = patient_info['Apellido materno'].iloc[0]
         id = patient_info['ID'].iloc[0]
 
-        st.subheader(f'Bienvenido, {nombre} {ap_paterno} {ap_materno} {id}')
+        st.title(f'Bienvenid@,')
+        st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
         col1, col2, col3 = st.columns(3)
 
         with col2.container():
-            col2.metric('Edad', user_data['Edad'])
-            col2.metric("Padecimientos", user_data['Padecimientos'])
-            col2.metric("Tipo de sangre", user_data['Tipo de sangre'])
-            col2.metric("Altura", user_data['Altura'])
-            col2.metric("Peso", user_data['Peso'])
+                col2.metric('Edad', user_data['Edad'])
+                col2.metric("Padecimientos", user_data['Padecimientos'])
+                col2.metric("Tipo de sangre", user_data['Tipo de sangre'])
+                col2.metric("Altura", user_data['Altura'])
+                col2.metric("Peso", user_data['Peso'])
 
         with col3.container():
             col3.metric('Género', user_data['Género'])
@@ -260,21 +262,41 @@ if selected == 'Pérfil':
         st.write(f'Teléfono: {user_data["Teléfono"]}')
 
 if selected == 'Exámenes de laboratorio':
-        def mostrar_archivos_pdf():
-          st.subheader("Archivos")
-          st.info('Selecciona el archivo a descargar:')
-          pdf_files = [f for f in os.listdir("pdf_files") if f.endswith('.pdf')]
-          if pdf_files:
-              for pdf in pdf_files:
-                  file_path = os.path.join("pdf_files", pdf)
-                  with open(file_path, "rb") as f:
-                      base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-                  download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
-                  st.markdown(download_link, unsafe_allow_html=True)
-          else:
-              st.error("No hay archivos PDF disponibles para descargar.")
+    usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+    patient_data = st.session_state.get('user_data', None)
 
-        mostrar_archivos_pdf()
+    if patient_data is not None:
+        patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+        if not patient_info.empty:
+            nombre = patient_info['Nombre(s)'].iloc[0]
+            ap_paterno = patient_info['Apellido paterno'].iloc[0]
+            ap_materno = patient_info['Apellido materno'].iloc[0]
+            id_paciente = patient_info['ID'].iloc[0]
+
+            st.title(f'Exámenes de laboratorio')
+            st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id_paciente}')
+
+            def mostrar_archivos_pdf(id_paciente):
+                st.subheader("Archivos")
+                st.info('Selecciona el archivo a descargar:')
+                patient_folder = f"{id_paciente}_examenes"
+
+                if not os.path.exists(patient_folder):
+                    st.error("No hay archivos PDF disponibles para descargar.")
+                    return
+
+                pdf_files = [f for f in os.listdir(patient_folder) if f.endswith('.pdf')]
+                if pdf_files:
+                    for pdf in pdf_files:
+                        file_path = os.path.join(patient_folder, pdf)
+                        with open(file_path, "rb") as f:
+                            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                        download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
+                        st.markdown(download_link, unsafe_allow_html=True)
+                else:
+                    st.error("No hay archivos PDF disponibles para descargar.")
+
+            mostrar_archivos_pdf(id_paciente)
 
 def load_med(patient_id):
     file_path = f'{patient_id}_medicamentos.csv'
@@ -293,7 +315,21 @@ def update_treatment_status(patient_id, med_df):
 
 if user_type == 'paciente':
     if selected == 'Medicamentos':
-        st.title('Medicamentos')
+        usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+        selected = st.session_state.get('selected',None)
+        patient_data = st.session_state.get('user_data',None)
+
+        if patient_data is not None:
+          patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+          if not patient_info.empty:
+
+            nombre = patient_info['Nombre(s)'].iloc[0]
+            ap_paterno = patient_info['Apellido paterno'].iloc[0]
+            ap_materno = patient_info['Apellido materno'].iloc[0]
+            id = patient_info['ID'].iloc[0]
+
+        st.title(f'Medicamentos,')
+        st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
 
         patient_id = user_data['ID']
 
@@ -334,7 +370,10 @@ if selected == 'Ruta quirúrgica':
           ap_materno = patient_info['Apellido materno'].iloc[0]
           patient_id = patient_info['ID'].iloc[0]
 
-          st.title(f'Ruta quirúrgica de, {nombre} {ap_paterno} {ap_materno} {patient_id}')
+          st.title(f'Ruta quirúrgica,')
+
+          st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
+
           st.write(f"""
 
               En esta sección, puedes encontrar detalles sobre tu ruta quirúrgica. La tabla a continuación muestra información importante sobre tus cirugías planificadas, incluyendo el nombre de la cirugía, el nombre del doctor encargado, la fecha programada, y el estado actual de la cirugía (pendiente, en proceso, realizada).
@@ -383,7 +422,22 @@ def update_treatment_status(patient_id, updated_diag_df):
         st.success(f"Se ha actualizado el estado del tratamiento del paciente {patient_id}")
 
 if selected == 'Diagnósticos médicos':
-      st.title('Mis Diagnósticos')
+      usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+      selected = st.session_state.get('selected',None)
+      patient_data = st.session_state.get('user_data',None)
+
+      if patient_data is not None:
+        patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+        if not patient_info.empty:
+
+          nombre = patient_info['Nombre(s)'].iloc[0]
+          ap_paterno = patient_info['Apellido paterno'].iloc[0]
+          ap_materno = patient_info['Apellido materno'].iloc[0]
+          id = patient_info['ID'].iloc[0]
+
+      st.title(f'Diagnósticos médicos,')
+      st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
+
       st.write(f"""
       En esta sección, puedes encontrar detalles sobre tus diagnósticos médicos. La tabla a continuación muestra información importante sobre tus diagnósticos recientes, incluyendo el nombre del diagnóstico, el nombre del doctor que lo realizó, la fecha del diagnóstico, y el estado actual (activo, en remisión, resuelto).
 
@@ -403,7 +457,22 @@ if selected == 'Diagnósticos médicos':
 
 
 if selected == 'Imágenes médicas':
-      st.title('Imágenes médicas')
+      usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+      selected = st.session_state.get('selected',None)
+      patient_data = st.session_state.get('user_data',None)
+
+      if patient_data is not None:
+          patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+          if not patient_info.empty:
+
+            nombre = patient_info['Nombre(s)'].iloc[0]
+            ap_paterno = patient_info['Apellido paterno'].iloc[0]
+            ap_materno = patient_info['Apellido materno'].iloc[0]
+            id = patient_info['ID'].iloc[0]
+
+      st.title(f'Imágenes médicas,')
+      st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
+
       st.write("Dado el tiempo limitado disponible para el proyecto y la falta de experiencia en TI en la aplicación de NEXIA, no se implementará un programa para la lectura de imágenes médicas en esta fase.\n\nSin embargo, es importante considerar la implementación de esta funcionalidad en el futuro para que la aplicación pueda ser una herramienta completa y eficaz en su campo.\n\nA continuación, se presentarán algunas imágenes que ilustran cómo debería verse esta funcionalidad cuando se integre en la aplicación con los avances tecnológicos actuales.")
 
       VIDEO_URL = "https://www.youtube.com/watch?v=YSQRWOy2Om4&ab_channel=TIME"
@@ -435,7 +504,22 @@ def obtener_informacion_vacunas(patient_id):
     return informacion_paciente
 
 if selected == 'Vacunas':
-    st.title('Vacunas')
+    usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+    selected = st.session_state.get('selected',None)
+    patient_data = st.session_state.get('user_data',None)
+
+    if patient_data is not None:
+      patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+      if not patient_info.empty:
+
+        nombre = patient_info['Nombre(s)'].iloc[0]
+        ap_paterno = patient_info['Apellido paterno'].iloc[0]
+        ap_materno = patient_info['Apellido materno'].iloc[0]
+        id = patient_info['ID'].iloc[0]
+
+    st.title(f'Vacunas,')
+    st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
+
     st.write(f"""
 
               En esta sección, puedes encontrar detalles sobre tu historial de vacunación. A continuación se muestra información sobre las vacunas que has recibido, incluyendo el nombre de la vacuna, una breve descripción, el número de lote y la fecha de aplicación.
@@ -486,27 +570,42 @@ def load_allergies(patient_id):
     return allergies_df
 
 if selected == 'Alergias':
-  st.title('Alergias')
-  st.write('Selecciona las alergias que padeces:')
-  alergias = pd.read_excel("Alergias.xlsx")
-  usuarios_pacientes = pd.read_excel("usuarios.xlsx")
-  selected = st.session_state.get('selected',None)
-  patient_data = st.session_state.get('user_data',None)
-  if patient_data is not None:
+   usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+   selected = st.session_state.get('selected',None)
+   patient_data = st.session_state.get('user_data',None)
+
+   if patient_data is not None:
+      patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
+      if not patient_info.empty:
+
+        nombre = patient_info['Nombre(s)'].iloc[0]
+        ap_paterno = patient_info['Apellido paterno'].iloc[0]
+        ap_materno = patient_info['Apellido materno'].iloc[0]
+        id = patient_info['ID'].iloc[0]
+
+   st.title(f'Alergias,')
+   st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
+
+   st.info('Selecciona las alergias que padeces:')
+   alergias = pd.read_excel("Alergias.xlsx")
+   usuarios_pacientes = pd.read_excel("usuarios.xlsx")
+   selected = st.session_state.get('selected',None)
+   patient_data = st.session_state.get('user_data',None)
+   if patient_data is not None:
       patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
       if not patient_info.empty:
 
         st.session_state.patient_id = patient_info['ID'].iloc[0]
 
-  opciones_alergias = alergias['Alergia alimentaria'].dropna().unique()
-  opciones_alergias1 = alergias['Alergia estacional'].dropna().unique()
-  opciones_alergias2 = alergias['Alergias de interiores'].dropna().unique()
-  opciones_alergias3 = alergias['Asma alérgica'].dropna().unique()
+   opciones_alergias = alergias['Alergia alimentaria'].dropna().unique()
+   opciones_alergias1 = alergias['Alergia estacional'].dropna().unique()
+   opciones_alergias2 = alergias['Alergias de interiores'].dropna().unique()
+   opciones_alergias3 = alergias['Asma alérgica'].dropna().unique()
 
-  if 'selected_allergies' not in st.session_state:
+   if 'selected_allergies' not in st.session_state:
       st.session_state.selected_allergies = set()
 
-  with st.expander("Alergias alimentarias"):
+   with st.expander("Alergias alimentarias"):
       st.write('Descripción: Una alergia alimentaria se produce cuando el sistema inmunitario del cuerpo reacciona de forma anómala a algo que suele ser inofensivo para la mayoría de las personas, como las proteínas de la leche o los huevos.')
 
       for opcion in opciones_alergias:
@@ -517,7 +616,7 @@ if selected == 'Alergias':
           elif not option_enabled and opcion in st.session_state.selected_allergies:
               st.session_state.selected_allergies.remove(opcion)
 
-  with st.expander("Alergias estacionales"):
+   with st.expander("Alergias estacionales"):
       st.write('Descripción: Se denomina alergia estacional, o también rinitis alérgica o fiebre del heno, a aquella que ocurre durante una época específica del año.')
 
       for opcion1 in opciones_alergias1:
@@ -528,7 +627,7 @@ if selected == 'Alergias':
           elif not option_enabled and opcion1 in st.session_state.selected_allergies:
               st.session_state.selected_allergies.remove(opcion1)
 
-  with st.expander("Alergias de interiores"):
+   with st.expander("Alergias de interiores"):
       st.write('Descripción: La alergia en interiores suele ser causa de síntomas durante todo el año, por lo que a veces se denomina alergia crónica o perenne.')
 
       for opcion2 in opciones_alergias2:
@@ -539,7 +638,7 @@ if selected == 'Alergias':
           elif not option_enabled and opcion2 in st.session_state.selected_allergies:
               st.session_state.selected_allergies.remove(opcion2)
 
-  with st.expander("Asma alérgica"):
+   with st.expander("Asma alérgica"):
       st.write('Descripción: El asma alérgica, o asma inducida por alergia, es un tipo de asma que la alergia desencadena o empeora. La exposición a alérgenos (por ejemplo, polen, caspa, moho, etc.) o a irritantes a los que los pacientes están sensibilizados puede aumentar los síntomas y precipitar las exacerbaciones en los pacientes con asma.')
 
       for opcion3 in opciones_alergias3:
@@ -550,20 +649,20 @@ if selected == 'Alergias':
           elif not option_enabled and opcion3 in st.session_state.selected_allergies:
               st.session_state.selected_allergies.remove(opcion3)
 
-  nueva_alergia_personalizada = st.text_input("Si tu alergia no está en la lista, por favor añádela aquí:",placeholder='Ingresa la alergia aquí')
+   nueva_alergia_personalizada = st.text_input("Si tu alergia no está en la lista, por favor añádela aquí:",placeholder='Ingresa la alergia aquí')
 
-  if nueva_alergia_personalizada and nueva_alergia_personalizada not in st.session_state.selected_allergies:
+   if nueva_alergia_personalizada and nueva_alergia_personalizada not in st.session_state.selected_allergies:
       st.session_state.selected_allergies.add(nueva_alergia_personalizada)
 
-  if 'patient_id' not in st.session_state:
+   if 'patient_id' not in st.session_state:
       st.session_state.patient_id = None
 
-  if st.button("Guardar alergias"):
+   if st.button("Guardar alergias"):
       save_allergies(st.session_state.selected_allergies, st.session_state.patient_id)
 
-  st.subheader("¡Alergias guardadas!")
-  allergies_data = load_allergies(st.session_state.patient_id)
-  st.write(allergies_data)
+   st.subheader("Alergias regístradas")
+   allergies_data = load_allergies(st.session_state.patient_id)
+   st.write(allergies_data)
 
 def load_symptoms_data(patient_id):
     try:
@@ -583,19 +682,25 @@ if selected == 'Registro de síntomas':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")
     selected = st.session_state.get('selected',None)
     patient_data = st.session_state.get('user_data',None)
+
     if patient_data is not None:
       patient_info = usuarios_pacientes.loc[usuarios_pacientes['ID'] == patient_data['ID']]
       if not patient_info.empty:
 
+        nombre = patient_info['Nombre(s)'].iloc[0]
+        ap_paterno = patient_info['Apellido paterno'].iloc[0]
+        ap_materno = patient_info['Apellido materno'].iloc[0]
         id = patient_info['ID'].iloc[0]
 
+    st.title(f'Regístro de síntomas,')
+    st.subheader(f'{nombre} {ap_paterno} {ap_materno} {id}')
 
     symptoms_list = ["Fiebre", "Tos", "Dolor de garganta", "Congestión nasal", "Dificultad para respirar", "Fatiga", "Dolor de cabeza", "Náuseas", "Dolor muscular", "Pérdida del gusto u olfato"]
 
+    st.subheader('Síntomas regístrados')
     symptoms_data = load_symptoms_data(id)
 
-    st.title("Registro de Síntomas Diarios")
-    st.write("Por favor, seleccione sus síntomas diarios:")
+    st.info("Por favor, seleccione sus síntomas diarios:")
 
     with st.form(key='symptoms_form'):
         date = st.date_input("Fecha", value=pd.Timestamp.today())
@@ -702,7 +807,7 @@ if selected == 'Doctor':
           st.error("No se encontraron doctores con la especialidad y sub-especialidad seleccionadas.")
 
 def display_patient_data_by_id(patient_id):
-    symptoms_data = load_symptoms_data(patient_id)  
+    symptoms_data = load_symptoms_data(patient_id)
     if not symptoms_data.empty:
         st.subheader("Registro de Síntomas Actual")
         st.write(symptoms_data[["Fecha", "Síntomas"]])
@@ -1049,12 +1154,13 @@ if selected == 'Pacientes':
                 st.error('No se han registrado diagnósticos para este paciente.')
 
 
-    def save_medic(medicamento, concentracion, patient_id, doctor_id, start_date, end_date):
+    def save_medic(medicamento, concentracion, patient_id, doctor_id, start_date, end_date,instruc):
         med_df = load_med(patient_id)
         new_med = pd.DataFrame({
             'Medicamento': [medicamento],
             'Concentracion': [concentracion],
             'Fecha': [datetime.now().strftime("%Y-%m-%d")],
+            'Instrucción': [instruc],
             'Doctor_ID': [doctor_id],
             'Fecha_Inicio': [start_date],
             'Fecha_Fin': [end_date],
@@ -1072,7 +1178,7 @@ if selected == 'Pacientes':
             if 'Tratamiento_Terminado' not in med_df.columns:
                 med_df['Tratamiento_Terminado'] = False
         except FileNotFoundError:
-            med_df = pd.DataFrame(columns=['Medicamento', 'Concentracion', 'Fecha', 'Doctor_ID', 'Fecha_Inicio', 'Fecha_Fin', 'Tratamiento_Terminado'])
+            med_df = pd.DataFrame(columns=['Medicamento', 'Concentración', 'Fecha', 'Doctor_ID','Instrucción', 'Fecha_Inicio', 'Fecha_Fin', 'Tratamiento_Terminado'])
         return med_df
 
 
@@ -1085,6 +1191,7 @@ if selected == 'Pacientes':
                 med = pd.read_excel('MEDICAMENTOS_ENERO_2022.xlsx')
                 selected_med = st.selectbox('Seleccione el medicamento:', med['NOMBRE GENERICO'].unique())
                 selected_concentracion = st.selectbox('Seleccione la concentración:', med[med['NOMBRE GENERICO'] == selected_med]['CONCENTRACION'].unique())
+                instruc = st.text_input('Ingresar instrucciones del tratamiento:')
                 doctor_id = st.text_input('ID del Doctor:')
                 start_date = st.date_input('Fecha de inicio del tratamiento')
                 end_date = st.date_input('Fecha de finalización del tratamiento')
@@ -1137,30 +1244,43 @@ if selected == 'Pacientes':
               st.error("No se encontró información para paciente proporcionado.")
 
     if selected == 'Exámenes de laboratorio':
-      
-      def mostrar_archivos_pdf():
-        st.subheader("Archivos")
-        st.info('Selecciona el archivo a descargar:')
-        pdf_files = [f for f in os.listdir("pdf_files") if f.endswith('.pdf')]
-        if pdf_files:
-            for pdf in pdf_files:
-                file_path = os.path.join("pdf_files", pdf)
-                with open(file_path, "rb") as f:
-                    base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-                download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
-                st.markdown(download_link, unsafe_allow_html=True)
+
+        def mostrar_archivos_pdf(id_paciente):
+            st.subheader("Archivos")
+            st.info('Selecciona el archivo a descargar:')
+            folder_path = f"{id_paciente}_examenes"
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+
+            pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
+            if pdf_files:
+                for pdf in pdf_files:
+                    file_path = os.path.join(folder_path, pdf)
+                    with open(file_path, "rb") as f:
+                        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                    download_link = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="{pdf}">Descargar {pdf}</a>'
+                    st.markdown(download_link, unsafe_allow_html=True)
+            else:
+                st.error("No hay archivos PDF disponibles para descargar.")
+
+        st.title('Exámenes de laboratorio')
+
+        id_paciente = st.session_state.get('user_data', {}).get('ID', None)
+
+        if id_paciente is not None:
+            st.info(f"Sube el examen del paciente ID: {id_paciente}")
+            uploaded_file = st.file_uploader("Subir un archivo PDF", type="pdf")
+
+            if uploaded_file is not None:
+                st.success(f"Archivo subido: {uploaded_file.name}")
+                folder_path = f"{id_paciente}_examenes"
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+
+                file_path = os.path.join(folder_path, uploaded_file.name)
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+
+            mostrar_archivos_pdf(id_paciente)
         else:
-            st.error("No hay archivos PDF disponibles para descargar.")
-
-      st.title('Exámenes de laboratorio')
-      st.info('Sube el examen a continuación:')
-      uploaded_file = st.file_uploader("Subir un archivo PDF", type="pdf")
-
-      if uploaded_file is not None:
-          st.success(f"Archivo subido: {uploaded_file.name}")
-          
-          file_path = os.path.join("pdf_files", uploaded_file.name)
-          with open(file_path, "wb") as f:
-              f.write(uploaded_file.getbuffer())
-
-      mostrar_archivos_pdf()
+            st.error("No se ha seleccionado ningún paciente.")

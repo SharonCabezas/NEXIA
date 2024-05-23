@@ -108,10 +108,10 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
         df = pd.read_csv(file_path)
     else:
         # Crear un nuevo DataFrame si el archivo no existe
-        df = pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
+        df = pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
     
     # Crear un nuevo DataFrame con la nueva cita
-    new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo]], columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo'])
+    new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
     
     # Concatenar el nuevo DataFrame con el existente
     df = pd.concat([df, new_data], ignore_index=True)
@@ -119,9 +119,8 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
     # Guardar el DataFrame en el archivo de Excel
     df.to_csv(file_path, index=False)
 
-# Función para obtener citas para un médico específico desde Excel
 def get_citas_from_excel(nombre_medico):
-    file_path = "BD Citas.csv"
+    file_path = "Citas.csv"
     
     # Leer el archivo de Excel
     if os.path.exists(file_path):
@@ -130,8 +129,19 @@ def get_citas_from_excel(nombre_medico):
         citas = df[df['Nombre'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'Dia', 'Mes', 'Ano', 'MOTIVODECITA'])
-        
+        return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
+
+def update_cita_estado(nombre_medico, dia, mes, ano, estado):
+    file_path = "Citas.csv"
+    
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
+        # Localizar la cita específica y actualizar su estado
+        mask = (df['Nombre'] == nombre_medico) & (df['Dia'] == dia) & (df['Mes'] == mes) & (df['Ano'] == ano)
+        df.loc[mask, 'Estado'] = estado
+        # Guardar los cambios en el archivo
+        df.to_csv(file_path, index=False)
+
 if 'cita_agendada' not in st.session_state:
     st.session_state['cita_agendada'] = False
 
@@ -143,18 +153,17 @@ if st.session_state['cita_agendada']:
     st.write(f"Fecha: {st.session_state['dia']}/{st.session_state['mes']}/{st.session_state['ano']}")
     st.write(f"Motivo de cita: {st.session_state['MOTIVODECITA']}")
 else:
-
     if selected == 'Cita':
         with st.form("Cita"):
             NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
             ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
             d, m, a = st.columns(3)
             with d:
-                dia = st.number_input("Día", min_value=1, max_value=31,step=1)
+                dia = st.number_input("Día", min_value=1, max_value=31, step=1)
             with m:
-                mes = st.number_input("Mes", min_value=1, max_value=12,step=1)
+                mes = st.number_input("Mes", min_value=1, max_value=12, step=1)
             with a:
-                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100,step=1)
+                ano = st.number_input("Año", min_value=datetime.now().year, max_value=2100, step=1)
             MOTIVODECITA = st.selectbox("Motivo de cita: ", ['Primera cita', 'Seguimiento'])
 
             submitted = st.form_submit_button("Agendar cita")
@@ -178,17 +187,38 @@ else:
                 st.write(f"Especialidad: {ESPECIALIDAD}")
                 st.write(f"Fecha: {dia}/{mes}/{ano}")
                 st.write(f"Motivo de cita: {MOTIVODECITA}")
-    
-    if selected == 'Citas':
-        NOMBRE_MEDICO = st.selectbox("Seleccionar médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-        if st.button("Ver citas"):
-            citas = get_citas_from_excel(NOMBRE_MEDICO)
-            for index, cita in citas.iterrows():
-                st.write(f"Médico: {cita['Nombre']}")
-                st.write(f"Especialidad: {cita['Especialidad']}")
-                st.write(f"Fecha: {cita['Dia']}/{cita['Mes']}/{cita['Ano']}")
-                st.write(f"Motivo de cita: {cita['Motivo']}")
-                st.write("---")
+
+    if selected == 'Citas' and user_type == 'doctor':
+        NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
+        citas = get_citas_from_excel(NOMBRE_MEDICO)
+
+        if not citas.empty:
+            st.subheader(f"Citas para {NOMBRE_MEDICO}")
+            
+            gb = GridOptionsBuilder.from_dataframe(citas)
+            gb.configure_pagination(paginationAutoPageSize=True)
+            gb.configure_default_column(editable=True, groupable=True)
+            gb.configure_column("Estado", cellEditor='agSelectCellEditor', cellEditorParams={'values': ['Pendiente', 'Aceptada', 'Rechazada']})
+            gb.configure_grid_options(onCellValueChanged='cellValueChanged')
+
+            gridOptions = gb.build()
+
+            def on_cell_value_changed(event):
+                update_cita_estado(event['data']['Nombre'], event['data']['Dia'], event['data']['Mes'], event['data']['Ano'], event['data']['Estado'])
+                st.experimental_rerun()
+
+            grid_response = AgGrid(
+                citas,
+                gridOptions=gridOptions,
+                update_mode=GridUpdateMode.VALUE_CHANGED,
+                allow_unsafe_jscode=True
+            )
+
+            for row in grid_response['data']:
+                if 'Pendiente' in row['Estado']:
+                    st.write(f"Pendiente de respuesta: {row}")
+                else:
+                    st.write(f"Estado: {row['Estado']}")
 
 if selected == 'Pérfil':
     usuarios_pacientes = pd.read_excel("usuarios.xlsx")

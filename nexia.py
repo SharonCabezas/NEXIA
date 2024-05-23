@@ -167,6 +167,7 @@ if selected == 'Cita':
 
 if selected == 'Citas' and user_type == 'doctor':
     st.title('Citas Agendadas')
+    st.info('Haga doble click si quiere aceptar o rechazar la cita.')
     NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
     citas = get_citas_from_excel(NOMBRE_MEDICO)
 
@@ -174,7 +175,6 @@ if selected == 'Citas' and user_type == 'doctor':
         st.subheader(f"Citas para {NOMBRE_MEDICO}")
 
         st.dataframe(citas)
-        st.info('Haga doble click si quiere aceptar o rechazar la cita.')
         for index, cita in citas.iterrows():
             estado = cita['estado']
             if estado == 'Pendiente':

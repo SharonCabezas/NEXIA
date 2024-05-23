@@ -195,9 +195,9 @@ else:
                     accepted = st.button(f"Aceptar Cita {index + 1}")
                     rejected = st.button(f"Rechazar Cita {index + 1}")
                     if accepted:
-                        update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Aceptada')
+                        update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Aceptada')
                     elif rejected:
-                        update_cita_estado(cita['Nombre'], cita['Dia'], cita['Mes'], cita['Ano'], 'Rechazada')
+                        update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
                 else:
                     st.write(f"Estado: {estado}")
 

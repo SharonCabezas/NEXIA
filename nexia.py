@@ -129,6 +129,7 @@ def update_cita_estado(citas, index, new_state):
     citas.to_csv('BD Citas.csv', index=False)
 
 if selected == 'Cita':
+    st.title('Agendar citas')
     with st.form("Cita"):
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         cita = pd.read_csv("BD Citas.csv")
@@ -170,9 +171,8 @@ if selected == 'Citas' and user_type == 'doctor':
     if not citas.empty:
         st.subheader(f"Citas para {NOMBRE_MEDICO}")
 
-        # Mostrar las citas en una tabla
         st.dataframe(citas)
-
+        st.info('Haga doble click si quiere aceptar o rechazar la cita.')
         for index, cita in citas.iterrows():
             estado = cita['estado']
             if estado == 'Pendiente':

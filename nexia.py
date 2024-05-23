@@ -178,13 +178,14 @@ if selected == 'Citas' and user_type == 'doctor':
             if estado == 'Pendiente':
                 accepted = st.button(f"Aceptar Cita {index + 1}")
                 rejected = st.button(f"Rechazar Cita {index + 1}")
-            if accepted:
-                    update_cita_estado(citas, index, 'Aceptada')  # Actualizar el estado a 'Aceptada'
-            elif rejected:
-                    update_cita_estado(citas, index, 'Rechazada')  # Actualizar el estado a 'Rechazada'
+                if accepted:
+                        update_cita_estado(citas, index, 'Aceptada')  # Actualizar el estado a 'Aceptada'
+                elif rejected:
+                        update_cita_estado(citas, index, 'Rechazada')  # Actualizar el estado a 'Rechazada'
+                else:
+                    st.write(f"Estado: {estado}")
             else:
                 st.write(f"Estado: {estado}")
-
 
 
 if selected == 'Pérfil':

@@ -183,13 +183,11 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     
         if not citas.empty:
             st.subheader(f"Citas para {NOMBRE_MEDICO}")
-            
+    
+            # Mostrar las citas en una tabla
+            st.dataframe(citas)
+    
             for index, cita in citas.iterrows():
-                st.write(f"Cita {index + 1}:")
-                st.write(f"Médico: {cita['NOMBRE']}")
-                st.write(f"Especialidad: {cita['ESPECIALIDAD']}")
-                st.write(f"Fecha: {cita['dia']}/{cita['mes']}/{cita['ano']}")
-                st.write(f"Motivo de cita: {cita['MOTIVODECITA']}")
                 estado = cita['estado']
                 if estado == 'Pendiente':
                     accepted = st.button(f"Aceptar Cita {index + 1}")
@@ -200,6 +198,7 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
                         update_cita_estado(cita['NOMBRE'], cita['dia'], cita['mes'], cita['ano'], 'Rechazada')
                 else:
                     st.write(f"Estado: {estado}")
+
 
 
 if selected == 'Pérfil':

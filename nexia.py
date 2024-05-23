@@ -120,7 +120,7 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
     df.to_csv(file_path, index=False)
 
 def get_citas_from_excel(nombre_medico):
-    file_path = "Citas.csv"
+    file_path = "BD Citas.csv"
     
     # Leer el archivo de Excel
     if os.path.exists(file_path):
@@ -132,7 +132,7 @@ def get_citas_from_excel(nombre_medico):
         return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
 
 def update_cita_estado(nombre_medico, dia, mes, ano, estado):
-    file_path = "Citas.csv"
+    file_path = "BD Citas.csv"
     
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)

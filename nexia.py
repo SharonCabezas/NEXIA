@@ -111,7 +111,7 @@ def insert_cita_to_excel(nombre, especialidad, dia, mes, ano, motivo):
         df = pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
     
     # Crear un nuevo DataFrame con la nueva cita
-    new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
+    new_data = pd.DataFrame([[nombre, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
     # Concatenar el nuevo DataFrame con el existente
     df = pd.concat([df, new_data], ignore_index=True)
@@ -126,10 +126,10 @@ def get_citas_from_excel(nombre_medico):
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
         # Filtrar las citas para el médico específico
-        citas = df[df['Nombre'] == nombre_medico]
+        citas = df[df['NOMBRE'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['Nombre', 'Especialidad', 'Dia', 'Mes', 'Ano', 'Motivo', 'Estado'])
+        return pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
 
 def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     file_path = "BD Citas.csv"
@@ -137,7 +137,7 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
         # Localizar la cita específica y actualizar su estado
-        mask = (df['Nombre'] == nombre_medico) & (df['Dia'] == dia) & (df['Mes'] == mes) & (df['Ano'] == ano)
+        mask = (df['NOMBRE'] == nombre_medico) & (df['dia'] == dia) & (df['mes'] == mes) & (df['ano'] == ano)
         df.loc[mask, 'Estado'] = estado
         # Guardar los cambios en el archivo
         df.to_csv(file_path, index=False)

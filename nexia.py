@@ -1151,7 +1151,7 @@ if selected == 'Pacientes':
                 st.error('No se han registrado diagnósticos para este paciente.')
 
 
-    def save_medic(medicamento, concentracion, patient_id, doctor_id, start_date, end_date,instruc):
+    def save_medic(medicamento, concentracion, patient_id, doctor_id, start_date, end_date, instruc):
         med_df = load_med(patient_id)
         new_med = pd.DataFrame({
             'Medicamento': [medicamento],

@@ -172,8 +172,8 @@ def update_cita_estado(nombre_medico, dia, mes, ano, estado):
 
                 st.success("¡Gracias por hacer tu cita!")
                 cita = pd.read_csv("BD Citas.csv")
-                dfcita=cita.loc[cita["NOMBREC"==NOMBRE_CLIENTE]]
-                st.dataframe(df)
+                dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
+                st.dataframe(dfcita)
 
     if selected == 'Citas' and user_type == 'doctor':
         NOMBRE_MEDICO = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"

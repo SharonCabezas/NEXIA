@@ -106,10 +106,10 @@ def insert_cita_to_excel(nombre, nombrec, especialidad, dia, mes, ano, motivo):
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
     else:
-        df = pd.DataFrame(columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
+        df = pd.DataFrame(columns=['NOMBRE','ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
     new_data = pd.DataFrame([[nombre, nombrec, especialidad, dia, mes, ano, motivo, 'Pendiente']], 
-                            columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
+                            columns=['NOMBRE', 'NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
     
     df = pd.concat([df, new_data], ignore_index=True)
     df.to_csv(file_path, index=False)
@@ -119,13 +119,13 @@ def get_citas_from_excel(nombre_medico):
     
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        citas = df[df['Nombre'] == nombre_medico]
+        citas = df[df['NOMBRE'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
+        return pd.DataFrame(columns=['NOMBRE', 'NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
 
 def update_cita_estado(citas, index, new_state):
-    citas.loc[index, 'Estado'] = new_state
+    citas.loc[index, 'estado'] = new_state
     citas.to_csv('BD Citas.csv', index=False)
 
 # Aquí comienza el código de la aplicación Streamlit
@@ -140,7 +140,7 @@ if selected == 'Cita':
             st.dataframe(dfcita)
         
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
+            ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['ESPECIALIDAD'])
         d, m, a = st.columns(3)
         with d:
             dia = st.number_input("Día", min_value=1, max_value=31, step=1)

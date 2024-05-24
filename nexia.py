@@ -134,10 +134,9 @@ if selected == 'Cita':
         st.title('Agendar citas')
         st.header('Formulario de Agendar Cita')
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
-        if os.path.exists("BD Citas.csv"):
-            cita = pd.read_csv("BD Citas.csv")
-            dfcita = cita.loc[cita["NOMBREC"] == NOMBRE_CLIENTE]
-            st.dataframe(dfcita)
+        cita = pd.read_csv("BD Citas.csv")
+        dfcita = cita.loc[cita["NOMBREC"] == NOMBRE_CLIENTE]
+        st.dataframe(dfcita)
         
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
         ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])

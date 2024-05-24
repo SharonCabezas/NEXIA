@@ -100,18 +100,18 @@ with st.sidebar:
         )
 
 
-def insert_cita_to_excel(nombre,nombrec, especialidad, dia, mes, ano, motivo):
+def insert_cita_to_excel(nombre, nombrec, especialidad, dia, mes, ano, motivo):
     file_path = "BD Citas.csv"
     
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
     else:
-        df = pd.DataFrame(columns=['NOMBRE', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
+        df = pd.DataFrame(columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
     
-    new_data = pd.DataFrame([[nombre,nombrec, especialidad, dia, mes, ano, motivo, 'Pendiente']], columns=['NOMBRE','NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
+    new_data = pd.DataFrame([[nombre, nombrec, especialidad, dia, mes, ano, motivo, 'Pendiente']], 
+                            columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
     
     df = pd.concat([df, new_data], ignore_index=True)
-    
     df.to_csv(file_path, index=False)
 
 def get_citas_from_excel(nombre_medico):
@@ -119,23 +119,25 @@ def get_citas_from_excel(nombre_medico):
     
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        citas = df[df['NOMBRE'] == nombre_medico]
+        citas = df[df['Nombre'] == nombre_medico]
         return citas
     else:
-        return pd.DataFrame(columns=['NOMBRE','NOMBREC', 'ESPECIALIDAD', 'dia', 'mes', 'ano', 'MOTIVODECITA', 'estado'])
+        return pd.DataFrame(columns=['Nombre', 'Paciente', 'Especialidad', 'Día', 'Mes', 'Año', 'Motivo_Cita', 'Estado'])
 
 def update_cita_estado(citas, index, new_state):
-    citas.loc[index, 'estado'] = new_state
+    citas.loc[index, 'Estado'] = new_state
     citas.to_csv('BD Citas.csv', index=False)
 
+# Aquí comienza el código de la aplicación Streamlit
 if selected == 'Cita':
     with st.form("Cita"):
         st.title('Agendar citas')
         st.header('Formulario de Agendar Cita')
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
-        cita = pd.read_csv("BD Citas.csv")
-        dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
-        st.dataframe(dfcita)
+        if os.path.exists("BD Citas.csv"):
+            cita = pd.read_csv("BD Citas.csv")
+            dfcita = cita.loc[cita["Paciente"] == NOMBRE_CLIENTE]
+            st.dataframe(dfcita)
         
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
         ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
@@ -158,11 +160,11 @@ if selected == 'Cita':
             st.session_state['MOTIVODECITA'] = MOTIVODECITA
             st.session_state['cita_agendada'] = True
 
-            insert_cita_to_excel(NOMBRE,NOMBRE_CLIENTE ,ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
+            insert_cita_to_excel(NOMBRE, NOMBRE_CLIENTE, ESPECIALIDAD, dia, mes, ano, MOTIVODECITA)
 
             st.success("¡Gracias por hacer tu cita!")
             cita = pd.read_csv("BD Citas.csv")
-            dfcita = cita.loc[cita["NOMBREC"]==NOMBRE_CLIENTE]
+            dfcita = cita.loc[cita["Paciente"] == NOMBRE_CLIENTE]
             st.dataframe(dfcita)
 
 if selected == 'Citas' and user_type == 'doctor':
@@ -176,14 +178,14 @@ if selected == 'Citas' and user_type == 'doctor':
 
         st.dataframe(citas)
         for index, cita in citas.iterrows():
-            estado = cita['estado']
+            estado = cita['Estado']
             if estado == 'Pendiente':
                 accepted = st.button(f"Aceptar Cita {index + 1}")
                 rejected = st.button(f"Rechazar Cita {index + 1}")
                 if accepted:
-                        update_cita_estado(citas, index, 'Aceptada')  # Actualizar el estado a 'Aceptada'
+                    update_cita_estado(citas, index, 'Aceptada')
                 elif rejected:
-                        update_cita_estado(citas, index, 'Rechazada')  # Actualizar el estado a 'Rechazada'
+                    update_cita_estado(citas, index, 'Rechazada')
             else:
                 st.write(f"Estado: {estado}")
 

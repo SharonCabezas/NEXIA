@@ -140,7 +140,7 @@ if selected == 'Cita':
             st.dataframe(dfcita)
         
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-            ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['ESPECIALIDAD'])
+        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['ESPECIALIDAD'])
         d, m, a = st.columns(3)
         with d:
             dia = st.number_input("Día", min_value=1, max_value=31, step=1)

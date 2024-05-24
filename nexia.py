@@ -136,11 +136,11 @@ if selected == 'Cita':
         NOMBRE_CLIENTE = f"{user_data['Nombre(s)']} {user_data['Apellido paterno']} {user_data['Apellido materno']}"
         if os.path.exists("BD Citas.csv"):
             cita = pd.read_csv("BD Citas.csv")
-            dfcita = cita.loc[cita["Paciente"] == NOMBRE_CLIENTE]
+            dfcita = cita.loc[cita["NOMBREC"] == NOMBRE_CLIENTE]
             st.dataframe(dfcita)
         
         NOMBRE = st.selectbox("Médico: ", [f"{n} {ap} {am}" for n, ap, am in zip(doctors['Nombre(s)'], doctors['Apellido paterno'], doctors['Apellido materno'])])
-        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['ESPECIALIDAD'])
+        ESPECIALIDAD = st.selectbox("Especialidad: ", doctors['Especialidad'])
         d, m, a = st.columns(3)
         with d:
             dia = st.number_input("Día", min_value=1, max_value=31, step=1)
@@ -164,7 +164,7 @@ if selected == 'Cita':
 
             st.success("¡Gracias por hacer tu cita!")
             cita = pd.read_csv("BD Citas.csv")
-            dfcita = cita.loc[cita["Paciente"] == NOMBRE_CLIENTE]
+            dfcita = cita.loc[cita["NOMBREC"] == NOMBRE_CLIENTE]
             st.dataframe(dfcita)
 
 if selected == 'Citas' and user_type == 'doctor':
@@ -178,7 +178,7 @@ if selected == 'Citas' and user_type == 'doctor':
 
         st.dataframe(citas)
         for index, cita in citas.iterrows():
-            estado = cita['Estado']
+            estado = cita['estado']
             if estado == 'Pendiente':
                 accepted = st.button(f"Aceptar Cita {index + 1}")
                 rejected = st.button(f"Rechazar Cita {index + 1}")
